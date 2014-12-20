@@ -15,9 +15,10 @@ var dbFactory = new OrmLiteConnectionFactory(connectionString, MySqlDialectProvi
 			}
 ```
 
-where MySqlDialectProvider.Instance could be any DialectProvider given by OrmLite
-where ISqlProvider is a simple interface you quickly can derive, 
-but is already implemented and tested for MySql and implemented for MsSql
+Where:
+MySqlDialectProvider.Instance could be any DialectProvider given by OrmLite.
+ISqlProvider is a simple interface you quickly can derive, 
+but is already implemented and tested for MySql and implemented for MsSql:
 
 ```csharp
 	public interface ISqlProvider
