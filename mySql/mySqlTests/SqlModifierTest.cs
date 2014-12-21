@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using mySql;
 using NUnit.Framework;
+using OrmLitePehjExtensions;
 
 namespace mySqlTests
 {

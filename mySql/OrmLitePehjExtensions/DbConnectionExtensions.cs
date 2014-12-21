@@ -4,7 +4,7 @@ using System.Data;
 using System.Linq;
 using NServiceKit.OrmLite;
 
-namespace mySql
+namespace OrmLitePehjExtensions
 {
 	namespace System.Data
 	{

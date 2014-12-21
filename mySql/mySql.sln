@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mySql", "mySql\mySql.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mySql.Tests", "mySqlTests\mySql.Tests.csproj", "{7FF37004-B177-4E46-AF5C-54E10462280B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrmLitePehjExtensions", "OrmLitePehjExtensions\OrmLitePehjExtensions.csproj", "{1E167ED0-08D8-45AE-BF98-D6F150C9945E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{7FF37004-B177-4E46-AF5C-54E10462280B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7FF37004-B177-4E46-AF5C-54E10462280B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7FF37004-B177-4E46-AF5C-54E10462280B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E167ED0-08D8-45AE-BF98-D6F150C9945E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E167ED0-08D8-45AE-BF98-D6F150C9945E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E167ED0-08D8-45AE-BF98-D6F150C9945E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E167ED0-08D8-45AE-BF98-D6F150C9945E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

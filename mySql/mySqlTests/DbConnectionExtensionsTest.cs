@@ -6,10 +6,10 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using mySql;
-using mySql.System.Data;
 using NServiceKit.OrmLite;
 using NServiceKit.OrmLite.MySql;
 using NUnit.Framework;
+using OrmLitePehjExtensions;
 
 namespace mySqlTests
 {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace mySql
+namespace OrmLitePehjExtensions
 {
 	public interface ISqlProvider
 	{

@@ -18,6 +18,7 @@ namespace mySql
 
 		[ForeignKey(typeof(Customer), OnDelete = "NO ACTION", OnUpdate = "NO ACTION")]
 		public int? CustomerId { get; set; }
+
 	}
 
 	public class Customer

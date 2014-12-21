@@ -1,4 +1,4 @@
-﻿namespace mySql
+﻿namespace OrmLitePehjExtensions
 {
 	public class SqlModifier
 	{
