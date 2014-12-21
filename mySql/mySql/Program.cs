@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,13 +26,28 @@ namespace mySql
 				db.UpdateTable<Customer>(customProvider, true);
 				db.UpdateTable<Order>(customProvider, true);
 
+				//db.Insert(new Customer
+				//{
+				//	Name = "Hansi",
+				//	Company = "KMD",
+				//	Birthday = new DateTime(1979, 3, 8)
+				//});
+
+				//db.Insert(new Customer
+				//{
+				//	Name = "Karsten",
+				//	Company = "Fakta",
+				//	Birthday = new DateTime(1990, 12, 29)
+				//});
+
 				//db.Insert(new Order
 				//{
-				//	Freight = 2,
+				//	CustomerId = db.Select<Customer>(x => x.Name == "Hansi").FirstOrDefault().Id,
+				//	Freight = 2032.32m,
+				//	Total = 2323.23m,
 				//	OrderDate = DateTime.Now,
-
-				//	Total = 999,
-				//	Hue = 2
+				//	RequiredDate = DateTime.Now.AddDays(7),
+				//	ShipVia = 232
 				//});
 
 

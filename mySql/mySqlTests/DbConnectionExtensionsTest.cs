@@ -44,7 +44,7 @@ namespace mySqlTests
 			using (var db = dbFactory.OpenDbConnection())
 			{
 				var model = ModelDefinition<TestClass>.Definition;
-				var sql = string.Format(CustomProvider.DropTable + " " + db.GetDialectProvider().GetQuotedTableName(model));
+				var sql = CustomProvider.DropTable + " " + db.GetDialectProvider().GetQuotedTableName(model);
 				db.ExecuteSql(sql);
 			}
 		}

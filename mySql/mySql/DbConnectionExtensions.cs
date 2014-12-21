@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using NServiceKit;
 using NServiceKit.OrmLite;
 
 namespace mySql
@@ -33,13 +32,14 @@ namespace mySql
 			}
 
 			//Updates the table on the database to reflect the model
-			public static void UpdateTable<T>(this IDbConnection db, ISqlProvider sqlProvider, bool deleteColumns) where T : new()
+			public static void UpdateTable<T>(this IDbConnection db, ISqlProvider sqlProvider, bool deleteColumns)
+				where T : new()
 			{
 				//Use orm-lite to get a nice definition of our model, this is gold, this is the reason why this code is easy
 				ModelDefinition model = ModelDefinition<T>.Definition;
 
 				//Create the table if it doesn't already exist
-				if (db.TableExists(model.ModelName) == false)
+				if (!db.TableExists(model.ModelName))
 				{
 					db.CreateTable<T>(false);
 					Console.WriteLine(db.GetLastSql());
@@ -56,13 +56,34 @@ namespace mySql
 				//Add a new column for each missing field
 				foreach (FieldDefinition field in missingOnDb)
 				{
-					//if (field != ForeignKey)
-					var addSql = db.GetDialectProvider().ToAddColumnStatement(typeof (T), field);
-					//else
-					//addSql = db.GetDialectProvider().ToAddForeignKeyStatement(??,??,??,??,??);
-
+					//Add the column
+					string addSql = db.GetDialectProvider().ToAddColumnStatement(typeof (T), field);
 					Console.WriteLine(addSql);
 					db.ExecuteSql(addSql);
+
+					//Check if it's foreign key
+					if (field.ForeignKey == null)
+						continue;
+
+					Console.WriteLine("Found foreign key constraint");
+
+					//Build the foreign key constraint
+					string onDeleteFkSql = field.ForeignKey.OnDelete;
+					string onUpdateFkSql = field.ForeignKey.OnUpdate;
+					string foreignKeyConstraintName = db.GetDialectProvider().GetQuotedColumnName(field.ForeignKey.ForeignKeyName);
+
+					string tableName = db.GetDialectProvider().GetQuotedTableName(model);
+					string fkName = db.GetDialectProvider().GetQuotedColumnName(field.FieldName);
+					string foreignTableName = db.GetDialectProvider().GetQuotedTableName(field.ForeignKey.ReferenceType.Name);
+					string foreignKeyName = db.GetDialectProvider().GetQuotedColumnName("Id");	//we have to assume we want to reference Id
+
+					string addFkConstraintSql = sqlProvider.AddForeignKeyConstraint(tableName, fkName, foreignTableName, foreignKeyName,
+						onDeleteFkSql, onUpdateFkSql);
+
+					Console.WriteLine(addFkConstraintSql);
+					db.ExecuteSql(addFkConstraintSql);
+
+					//Tried to use ToAddForeignKeyStatement, couldn't get it to work!
 				}
 
 				//If safety bool is false, return
@@ -71,13 +92,13 @@ namespace mySql
 
 				//		DELETE FIELDS THAT EXISTS ON DB BUT NOT IN MODEL
 				List<string> modelFields = model.FieldDefinitionsArray.Select(x => x.FieldName).ToList();
-				var extraOnDb = dbColumns.Where(x => !modelFields.Contains(x)).ToList();
+				List<string> extraOnDb = dbColumns.Where(x => !modelFields.Contains(x)).ToList();
 
-				foreach (var extra in extraOnDb)
+				foreach (string extra in extraOnDb)
 				{
-					var deleteSql = sqlProvider.AlterTable + " " + db.GetDialectProvider().GetQuotedTableName(model) + " " +
-					                sqlProvider.DropColumn +
-					                " " + db.GetDialectProvider().GetQuotedColumnName(extra);
+					string deleteSql = sqlProvider.AlterTable + " " + db.GetDialectProvider().GetQuotedTableName(model) + " " +
+					                   sqlProvider.DropColumn +
+					                   " " + db.GetDialectProvider().GetQuotedColumnName(extra);
 					Console.WriteLine(deleteSql);
 					try
 					{
@@ -89,17 +110,17 @@ namespace mySql
 						Console.WriteLine("Trying to find and delete foreign key constraint, then drop.");
 						try
 						{
-							var tableNameQ = db.GetDialectProvider().GetQuotedTableName(model);
+							string tableNameQ = db.GetDialectProvider().GetQuotedTableName(model);
 							//Table name with special quotes for special DB command
-							var tableName = sqlProvider.SpecialQuotes + model.Name + sqlProvider.SpecialQuotes;
-							var columnName = sqlProvider.SpecialQuotes + extra + sqlProvider.SpecialQuotes;
+							string tableName = sqlProvider.SpecialQuotes + model.Name + sqlProvider.SpecialQuotes;
+							string columnName = sqlProvider.SpecialQuotes + extra + sqlProvider.SpecialQuotes;
 
 							//Find foreign key constraint name
-							var constraintNameSql = sqlProvider.GetForeignKeyConstraintName(tableName, columnName);
-							var constraintName = db.SqlList<string>(constraintNameSql)[0];
+							string constraintNameSql = sqlProvider.GetForeignKeyConstraintName(tableName, columnName);
+							string constraintName = db.SqlList<string>(constraintNameSql)[0];
 
 							//Create SQL that drops the foreign key constraint
-							var dropFkSql = sqlProvider.DropForeignKey(tableNameQ, constraintName);
+							string dropFkSql = sqlProvider.DropForeignKey(tableNameQ, constraintName);
 
 							Console.WriteLine(dropFkSql);
 							Console.WriteLine(deleteSql);
@@ -113,7 +134,6 @@ namespace mySql
 							throw new Exception("Could not delete the column");
 						}
 					}
-
 				}
 			}
 		}

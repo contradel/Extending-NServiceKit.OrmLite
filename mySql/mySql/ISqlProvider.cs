@@ -1,4 +1,6 @@
-﻿namespace mySql
+﻿using System;
+
+namespace mySql
 {
 	public interface ISqlProvider
 	{
@@ -7,10 +9,13 @@
 		string DropColumn { get; }
 		string DropTable { get; }
 		string AlterTable { get; }
-		string AddForeignKey(string tableName, string foreignTableName, string foreignKeyName, string referencedPkName);
+		string SpecialQuotes { get; }
+
+		string AddForeignKeyConstraint(string tableName, string fkName, string foreignTableName, string foreignKeyName,
+			string onDeleteOption, string onUpdateOption);
+
 		string DropForeignKey(string tableName, string fkKeyName);
 		string GetForeignKeyConstraintName(string tableName, string columnName);
-		string SpecialQuotes { get; }
 	}
 
 	public class MySqlProvider : ISqlProvider
@@ -40,10 +45,24 @@
 			get { return "ALTER TABLE"; }
 		}
 
-		public string AddForeignKey(string tableName, string foreignTableName, string foreignKeyName, string referencedPkName)
+		public string AddForeignKeyConstraint(string tableName, string fkName, string foreignTableName, string foreignKeyName,
+			string onDeleteOption, string onUpdateOption)
 		{
-			return AlterTable + " " + tableName + " " + " ADD FOREIGN KEY (" + foreignKeyName + ") REFERENCES " +
-			       foreignTableName + "(" + referencedPkName + ")";
+			//ALTER TABLE products
+			//ADD FOREIGN KEY fk_vendor(vdr_id)
+			//REFERENCES vendors(vdr_id)
+			//ON DELETE NO ACTION
+			//ON UPDATE CASCADE;
+
+			string foreignTableWithoutQuotes = new SqlModifier().RemoveFirstAndLastCharacter(foreignTableName);
+
+			string l1 = AlterTable + " " + tableName + " ";
+			string l2 = "ADD FOREIGN KEY fk_" + foreignTableWithoutQuotes + "(" + fkName + ") ";
+			string l3 = "REFERENCES " + foreignTableName + "(" + foreignKeyName + ") ";
+			string l4 = "ON DELETE " + onDeleteOption + " ";
+			string l5 = "ON UPDATE " + onUpdateOption;
+
+			return l1 + l2 + l3 + l4 + l5;
 		}
 
 		public string DropForeignKey(string tableName, string fkKeyName)
@@ -89,19 +108,20 @@
 				get { return "ALTER TABLE"; }
 			}
 
-			public string AddForeignKey(string tableName, string foreignTableName, string foreignKeyName, string referencedPkName)
+			public string AddForeignKeyConstraint(string tableName, string fkName, string foreignTableName, string foreignKeyName,
+				string onDeleteOption, string onUpdateOption)
 			{
-				return new MySqlProvider().AddForeignKey(tableName, foreignTableName, foreignKeyName, referencedPkName);
+				throw new NotImplementedException();
 			}
 
 			public string DropForeignKey(string tableName, string fkKeyName)
 			{
-				throw new global::System.NotImplementedException();
+				throw new NotImplementedException();
 			}
 
 			public string GetForeignKeyConstraintName(string tableName, string columnName)
 			{
-				throw new global::System.NotImplementedException();
+				throw new NotImplementedException();
 			}
 
 			public string SpecialQuotes
