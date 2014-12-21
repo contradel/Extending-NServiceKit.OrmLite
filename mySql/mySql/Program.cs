@@ -29,7 +29,7 @@ namespace mySql
 				//{
 				//	Freight = 2,
 				//	OrderDate = DateTime.Now,
-				//	RequiredDate = DateTime.Now + new TimeSpan(1),
+
 				//	Total = 999,
 				//	Hue = 2
 				//});
