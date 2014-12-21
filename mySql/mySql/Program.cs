@@ -27,7 +27,10 @@ namespace mySql
 				db.UpdateTable<Customer>(customProvider, true);
 				db.UpdateTable<Order>(customProvider, true);
 
+				//db.UpdateTable<SmallTestClass>(customProvider, true);
+				//db.UpdateTable<TestClassWithoutFk>(customProvider, true);
 
+				var sql = db.GetLastSql();
 
 				Console.ReadKey();
 			}

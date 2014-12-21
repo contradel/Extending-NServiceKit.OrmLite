@@ -14,7 +14,8 @@ namespace mySql
 		public DateTime? ShippedDate { get; set; }
 		public int? ShipVia { get; set; }
 		public decimal Freight { get; set; }
-		public decimal Total { get; set; }
+		//public decimal Total { get; set; }
+		public int Doge { get; set; }
 
 		[ForeignKey(typeof(Customer), OnDelete = "NO ACTION", OnUpdate = "NO ACTION")]
 		public int? CustomerId { get; set; }
@@ -30,4 +31,9 @@ namespace mySql
 		public string Company { get; set; }
 		public DateTime Birthday { get; set; }
 	}
+
+
+
+
+
 }
