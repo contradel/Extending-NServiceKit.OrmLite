@@ -12,7 +12,7 @@ namespace mySql
 		public DateTime? OrderDate { get; set; }
 		public DateTime? RequiredDate { get; set; }
 		public DateTime? ShippedDate { get; set; }
-		public int? ShipVia { get; set; }
+		//public int? ShipVia { get; set; }
 		public decimal Freight { get; set; }
 		//public decimal Total { get; set; }
 		public int Doge { get; set; }
@@ -30,6 +30,7 @@ namespace mySql
 		public string Name { get; set; }
 		public string Company { get; set; }
 		public DateTime Birthday { get; set; }
+		//public DateTime topdoge { get; set; }
 	}
 
 

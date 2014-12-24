@@ -5,7 +5,10 @@ namespace OrmLitePehjExtensions
 	public interface ISqlProvider
 	{
 		string TableInformation { get; }
-		string TableColumn { get; }
+		string ColumnName { get; }
+		string ColumnType { get; }
+		string Nullable { get; }
+		string NotNullValue { get; }
 		string DropColumn { get; }
 		string DropTable { get; }
 		string AlterTable { get; }
@@ -34,9 +37,24 @@ namespace OrmLitePehjExtensions
 			get { return "DESCRIBE"; }
 		}
 
-		public string TableColumn
+		public string ColumnName
 		{
 			get { return "FIELD"; }
+		}
+
+		public string ColumnType
+		{
+			get { return "TYPE"; }
+		}
+
+		public string Nullable
+		{
+			get { return "NULL"; }
+		}
+
+		public string NotNullValue
+		{
+			get { return "NO"; }
 		}
 
 		public string DropColumn

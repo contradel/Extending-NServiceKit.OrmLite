@@ -8,13 +8,20 @@ namespace OrmLitePehjExtensions
 {
 	namespace System.Data
 	{
+		public class DatabaseColumnInfo
+		{
+			public string Name { get; set; }
+			public string SqlType { get; set; }
+			public bool Nullable { get; set; }
+		}
+
 		//Modified code from http://stackoverflow.com/questions/14142433/with-ormlite-is-there-a-way-to-automatically-update-table-schema-when-my-poco-i
 		public static class DbConnectionExtensions
 		{
 			//Gets a list of strings of the columns that exists in the table on the database with tableName
-			private static List<string> GetColumnNames(this IDbConnection db, string tableName, ISqlProvider sqlProvider)
+			private static List<DatabaseColumnInfo> GetColumnInformation(this IDbConnection db, string tableName, ISqlProvider sqlProvider)
 			{
-				var columns = new List<string>();
+				var columns = new List<DatabaseColumnInfo>();
 				using (IDbCommand cmd = db.CreateCommand())
 				{
 					//create sql that gets table information
@@ -22,9 +29,14 @@ namespace OrmLitePehjExtensions
 					IDataReader reader = cmd.ExecuteReader();
 					while (reader.Read())
 					{
-						//ordinal is the index of the field which contains the column name
-						int ordinal = reader.GetOrdinal(sqlProvider.TableColumn);
-						columns.Add(reader.GetString(ordinal));
+						var tempColumn = new DatabaseColumnInfo
+						{
+							Name = reader[sqlProvider.ColumnName].ToString(),
+							SqlType = reader[sqlProvider.ColumnType].ToString(),
+							Nullable = reader[sqlProvider.Nullable].ToString() == sqlProvider.NotNullValue ? false : true
+						};
+
+						columns.Add(tempColumn);
 					}
 					reader.Close();
 				}
@@ -48,10 +60,16 @@ namespace OrmLitePehjExtensions
 
 				//		ADD FIELDS THAT EXISTS IN MODEL BUT NOT ON DB
 				//Find each of the missing fields on the database
-				List<string> dbColumns = GetColumnNames(db, model.ModelName, sqlProvider);
-				List<FieldDefinition> missingOnDb = model.FieldDefinitions
-					.Where(field => !dbColumns.Contains(field.FieldName))
-					.ToList();
+				var dbColumns = GetColumnInformation(db, model.ModelName, sqlProvider);
+				var missingOnDb = new List<FieldDefinition>();
+
+				foreach (FieldDefinition fieldDefinition in model.FieldDefinitions)
+				{
+					var found = dbColumns.Any(databaseColumnInfo => databaseColumnInfo.Name == fieldDefinition.FieldName);
+					if (!found)
+						missingOnDb.Add(fieldDefinition);
+				}
+
 
 				//Add a new column for each missing field
 				foreach (FieldDefinition field in missingOnDb)
@@ -92,13 +110,13 @@ namespace OrmLitePehjExtensions
 
 				//		DELETE FIELDS THAT EXISTS ON DB BUT NOT IN MODEL
 				List<string> modelFields = model.FieldDefinitionsArray.Select(x => x.FieldName).ToList();
-				List<string> extraOnDb = dbColumns.Where(x => !modelFields.Contains(x)).ToList();
+				List<DatabaseColumnInfo> extraOnDb = dbColumns.Where(x => !modelFields.Contains(x.Name)).ToList();
 
-				foreach (string extra in extraOnDb)
+				foreach (DatabaseColumnInfo columnInfo in extraOnDb)
 				{
-					string deleteSql = sqlProvider.AlterTable + " " + db.GetDialectProvider().GetQuotedTableName(model) + " " +
-					                   sqlProvider.DropColumn +
-					                   " " + db.GetDialectProvider().GetQuotedColumnName(extra);
+					var extraName = columnInfo.Name;
+					string tableNameQ = db.GetDialectProvider().GetQuotedTableName(model);
+					string deleteSql = sqlProvider.AlterTable + " " + tableNameQ + " " + sqlProvider.DropColumn + " " + db.GetDialectProvider().GetQuotedColumnName(extraName);
 					Console.WriteLine(deleteSql);
 					try
 					{
@@ -110,10 +128,9 @@ namespace OrmLitePehjExtensions
 						Console.WriteLine("Trying to find and delete foreign key constraint, then drop.");
 						try
 						{
-							string tableNameQ = db.GetDialectProvider().GetQuotedTableName(model);
 							//Table name with special quotes for special DB command
 							string tableName = sqlProvider.SpecialQuotes + model.Name + sqlProvider.SpecialQuotes;
-							string columnName = sqlProvider.SpecialQuotes + extra + sqlProvider.SpecialQuotes;
+							string columnName = sqlProvider.SpecialQuotes + extraName + sqlProvider.SpecialQuotes;
 
 							//Find foreign key constraint name
 							string constraintNameSql = sqlProvider.GetForeignKeyConstraintName(tableName, columnName);

@@ -24,6 +24,7 @@ namespace mySql
 
 			using (var db = dbFactory.OpenDbConnection())
 			{
+
 				db.UpdateTable<Customer>(customProvider, true);
 				db.UpdateTable<Order>(customProvider, true);
 
