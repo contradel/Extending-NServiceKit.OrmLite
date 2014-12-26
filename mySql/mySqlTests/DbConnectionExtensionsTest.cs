@@ -27,6 +27,7 @@ namespace mySqlTests
 		public static ISqlProvider CustomProvider = new MySqlProvider();
 		public static IOrmLiteDialectProvider OrmLiteDialectProvider = MySqlDialectProvider.Instance;
 
+		//All of these classes are different from what's on the DB. The DB schema is hardcoded strings inside iSqlProvider...
 		class SmallTestClass
 		{
 			[AutoIncrement]
@@ -81,18 +82,26 @@ namespace mySqlTests
 			public string Test { get; set; }
 		}
 
+		public class TestWithInteger
+		{
+			[AutoIncrement]
+			public int Id { get; set; }
+			public int? Test { get; set; }
+		}
+
 		[SetUp]
 		public void Init()
 		{
-			const string connectionStringPath = @"\\psf\Dropbox\Dox\Mac-Git\connectionString.txt";
+			const string connectionStringPath = @"\\psf\Home\Dropbox\Dox\Mac-Git\connectionString.txt";
 			connectionString_ = ConnectionStringReader.GetConnectionString(connectionStringPath);
 			var dbFactory = new OrmLiteConnectionFactory(connectionString_, OrmLiteDialectProvider);
 			using (var db = dbFactory.OpenDbConnection())
 			{
-				db.ExecuteSql(CustomProvider.CreateSmallTestClass());
-				db.ExecuteSql(CustomProvider.CreateBigTestClass());
-				db.ExecuteSql(CustomProvider.CreateTestClassWithFk());
-				db.ExecuteSql(CustomProvider.CreateTestClassWithOutFk());
+				db.ExecuteSql(CustomProvider.CreateSmallTestClass);
+				db.ExecuteSql(CustomProvider.CreateBigTestClass);
+				db.ExecuteSql(CustomProvider.CreateTestClassWithFk);
+				db.ExecuteSql(CustomProvider.CreateTestClassWithOutFk);
+				db.ExecuteSql(CustomProvider.CreateTestClassWithNotNullInt);
 			}
 		}
 
@@ -124,7 +133,7 @@ namespace mySqlTests
 					Assert.NotNull(test);
 					test.Name = "TestName";
 					test.Time = new DateTime(2000, 12, 12);
-				});				
+				});
 			}
 		}
 
@@ -166,13 +175,13 @@ namespace mySqlTests
 			using (var db = dbFactory.OpenDbConnection())
 			{
 				//Arrange by asserting that these exists on db, after function they should not exist anymore
-				var smallTestClass = CustomProvider.SpecialQuotes + "SmallTestClass" + CustomProvider.SpecialQuotes;
-				var prevision = CustomProvider.SpecialQuotes + "Precision" + CustomProvider.SpecialQuotes;
-				var targetDate = CustomProvider.SpecialQuotes + "TargetDate" + CustomProvider.SpecialQuotes;
+				var smallTestClass = CustomProvider.Quote("SmallTestClass");
+				var precision = CustomProvider.Quote("Precision");
+				var targetDate = CustomProvider.Quote("TargetDate");
 
 				//Executes raw sql to server
 				var countPrecision =
-						db.SqlList<string>(CustomProvider.CheckIfColumnExists(smallTestClass, prevision)).Count;
+						db.SqlList<string>(CustomProvider.CheckIfColumnExists(smallTestClass, precision)).Count;
 				Assert.GreaterOrEqual(countPrecision, 1);
 
 				var targetDateCount =
@@ -184,7 +193,7 @@ namespace mySqlTests
 
 				//Assert that they are gone
 				var countPrecisionAfter =
-						db.SqlList<string>(CustomProvider.CheckIfColumnExists(smallTestClass, prevision)).Count;
+						db.SqlList<string>(CustomProvider.CheckIfColumnExists(smallTestClass, precision)).Count;
 				Assert.LessOrEqual(countPrecisionAfter, 0);
 
 				var targetDateCountAfter =
@@ -200,9 +209,9 @@ namespace mySqlTests
 			using (var db = dbFactory.OpenDbConnection())
 			{
 				//Arrange by asserting that fk column on DB exists, first surround the tabel names and columns with quotes
-				var testClassWithFk = CustomProvider.SpecialQuotes + "TestClassWithFk" + CustomProvider.SpecialQuotes;
-				var fkName = CustomProvider.SpecialQuotes + "SmallTestClassId" + CustomProvider.SpecialQuotes;
-					
+				var testClassWithFk = CustomProvider.Quote("TestClassWithFk");
+				var fkName = CustomProvider.Quote("SmallTestClassId");
+
 				var hasFkConstraint =
 					db.SqlList<string>(CustomProvider.GetForeignKeyConstraintName(testClassWithFk, fkName));
 				Assert.GreaterOrEqual(hasFkConstraint.Count, 1);
@@ -227,8 +236,8 @@ namespace mySqlTests
 			using (var db = dbFactory.OpenDbConnection())
 			{
 				//Arrange by asserting that fk column on DB does not exists
-				var tableWithoutFk = CustomProvider.SpecialQuotes + "TestClassWithoutFk" + CustomProvider.SpecialQuotes;
-				var fkName = CustomProvider.SpecialQuotes + "SmallTestClassId" + CustomProvider.SpecialQuotes;
+				var tableWithoutFk = CustomProvider.Quote("TestClassWithoutFk");
+				var fkName = CustomProvider.Quote("SmallTestClassId");
 
 				//Assert that column does not exist
 				var noFkColumn = db.SqlList<string>(CustomProvider.CheckIfColumnExists(tableWithoutFk, fkName)).Count;
@@ -260,8 +269,8 @@ namespace mySqlTests
 			using (var db = dbFactory.OpenDbConnection())
 			{
 				//Arrange by asserting it doesn't exist
-				var table = CustomProvider.SpecialQuotes + "DoesntExist" + CustomProvider.SpecialQuotes;
-				var testProperty = CustomProvider.SpecialQuotes + "Test" + CustomProvider.SpecialQuotes;
+				var table = CustomProvider.Quote("DoesntExist");
+				var testProperty = CustomProvider.Quote("Test");
 
 				//Assert column test doens't exists
 				var noTestColumn = db.SqlList<string>(CustomProvider.CheckIfColumnExists(table, testProperty)).Count;
@@ -279,5 +288,30 @@ namespace mySqlTests
 			}
 		}
 
+		[Test]
+		public static void UpdateTable_ModelHasNullableIntButDbIsJustInt_UpdateToNullableIntOnDb()
+		{
+			var dbFactory = new OrmLiteConnectionFactory(connectionString_, OrmLiteDialectProvider);
+			using (var db = dbFactory.OpenDbConnection())
+			{
+				//Arrange
+				//Make sure test table is there
+				var tableName = CustomProvider.Quote("TestWithInteger");
+				var columnName = CustomProvider.Quote("Test");
+
+				var noTestColumn = db.SqlList<string>(CustomProvider.CheckIfColumnExists(tableName, columnName)).Count;
+				Assert.AreEqual(1, noTestColumn);
+
+				//Make sure it's not nullable now
+				//Assert.That(() => db.Insert(new TestWithInteger { Test = null }), Throws.Exception);
+
+				//Act
+				db.UpdateTable<TestWithInteger>(CustomProvider, true);
+
+				//Assert
+				Assert.DoesNotThrow(() => db.Insert(new TestWithInteger { Test = null }));
+			}
+		}
 	}
 }
+

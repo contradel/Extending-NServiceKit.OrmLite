@@ -129,12 +129,12 @@ namespace OrmLitePehjExtensions
 						try
 						{
 							//Table name with special quotes for special DB command
-							string tableName = sqlProvider.SpecialQuotes + model.Name + sqlProvider.SpecialQuotes;
-							string columnName = sqlProvider.SpecialQuotes + extraName + sqlProvider.SpecialQuotes;
+							string tableName = sqlProvider.Quote(model.Name);
+							string columnName = sqlProvider.Quote(extraName);
 
 							//Find foreign key constraint name
 							string constraintNameSql = sqlProvider.GetForeignKeyConstraintName(tableName, columnName);
-							string constraintName = db.SqlList<string>(constraintNameSql)[0];
+							string constraintName = db.SqlList<string>(constraintNameSql)[0];	//atm we only expect 1 constraint
 
 							//Create SQL that drops the foreign key constraint
 							string dropFkSql = sqlProvider.DropForeignKey(tableNameQ, constraintName);
@@ -149,6 +149,28 @@ namespace OrmLitePehjExtensions
 						{
 							Console.WriteLine(err);
 							throw new Exception("Could not delete the column");
+						}
+					}
+				}
+
+				//		CHANGE TYPE ADD NULLABLE TYPES WHERE MODEL IS NULLABLE AND DB IS NOT
+				var notSameNullDbColumnNames = new List<string>();
+				foreach (DatabaseColumnInfo databaseColumnInfo in dbColumns)
+				{
+					foreach (FieldDefinition fieldDefinition in model.FieldDefinitionsArray)
+					{
+						if (fieldDefinition.FieldType.ToString() != databaseColumnInfo.SqlType)
+						{
+							var x = 2;
+						}
+
+						if (databaseColumnInfo.Nullable && !fieldDefinition.IsNullable)
+						{
+							//Remove nullable constraint
+						}
+						if (!databaseColumnInfo.Nullable && fieldDefinition.IsNullable)
+						{
+							//Add nullable constraint
 						}
 					}
 				}

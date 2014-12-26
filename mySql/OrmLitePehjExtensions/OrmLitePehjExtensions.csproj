@@ -61,6 +61,7 @@
     <Compile Include="ConnectionStringReader.cs" />
     <Compile Include="DbConnectionExtensions.cs" />
     <Compile Include="ISqlProvider.cs" />
+    <Compile Include="MySqlProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SqlModifier.cs" />
   </ItemGroup>

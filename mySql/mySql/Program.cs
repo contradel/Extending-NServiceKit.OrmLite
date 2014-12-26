@@ -3,6 +3,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using NServiceKit.OrmLite;
@@ -16,7 +17,7 @@ namespace mySql
 	{
 		static void Main(string[] args)
 		{
-			const string connectionStringPath = @"\\psf\Dropbox\Dox\Mac-Git\connectionString.txt";
+			const string connectionStringPath = @"\\psf\Home\Dropbox\Dox\Mac-Git\connectionString.txt";
 			string connectionString = ConnectionStringReader.GetConnectionString(connectionStringPath);
 
 			var dbFactory = new OrmLiteConnectionFactory(connectionString, MySqlDialectProvider.Instance);
@@ -25,13 +26,16 @@ namespace mySql
 			using (var db = dbFactory.OpenDbConnection())
 			{
 
+				db.DropTable<TestWithInteger>();
+				db.UpdateTable<TestWithInteger>(customProvider, true);
+				var sql = db.GetLastSql();
+
 				db.UpdateTable<Customer>(customProvider, true);
 				db.UpdateTable<Order>(customProvider, true);
 
 				//db.UpdateTable<SmallTestClass>(customProvider, true);
 				//db.UpdateTable<TestClassWithoutFk>(customProvider, true);
 
-				var sql = db.GetLastSql();
 
 				Console.ReadKey();
 			}
