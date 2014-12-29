@@ -153,24 +153,25 @@ namespace OrmLitePehjExtensions
 					}
 				}
 
-				//		CHANGE TYPE ADD NULLABLE TYPES WHERE MODEL IS NULLABLE AND DB IS NOT
-				var notSameNullDbColumnNames = new List<string>();
+				//		CHANGE TYPE AND HANDLE NULLABLE
 				foreach (DatabaseColumnInfo databaseColumnInfo in dbColumns)
 				{
 					foreach (FieldDefinition fieldDefinition in model.FieldDefinitionsArray)
 					{
-						if (fieldDefinition.FieldType.ToString() != databaseColumnInfo.SqlType)
-						{
-							var x = 2;
-						}
+						//Find the same column
+						if (databaseColumnInfo.Name != fieldDefinition.Name) 
+							continue;
 
-						if (databaseColumnInfo.Nullable && !fieldDefinition.IsNullable)
+						//compare type and nullable
+						var dbType = SqlTypeConverter.GetTypeFromSqlString(databaseColumnInfo.SqlType);
+						if ((fieldDefinition.FieldType != dbType) || (databaseColumnInfo.Nullable != fieldDefinition.IsNullable))
 						{
-							//Remove nullable constraint
-						}
-						if (!databaseColumnInfo.Nullable && fieldDefinition.IsNullable)
-						{
-							//Add nullable constraint
+							//Get alter column type sql to alter it to fieldDefinition.FieldType
+							var alterSql = db.GetDialectProvider().ToAlterColumnStatement(model.ModelType, fieldDefinition);
+
+							//Execute sql
+							Console.WriteLine(alterSql);
+							db.ExecuteSql(alterSql);
 						}
 					}
 				}

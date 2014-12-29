@@ -2,6 +2,11 @@
 {
 	public class MySqlProvider : ISqlProvider
 	{
+		public string SpecialQuotes
+		{
+			get { return "'"; }
+		}
+
 		public string TableInformation
 		{
 			get { return "DESCRIBE"; }
@@ -56,13 +61,13 @@
 			//ON DELETE NO ACTION
 			//ON UPDATE CASCADE;
 
-			string foreignTableWithoutQuotes = new SqlModifier().RemoveFirstAndLastCharacter(foreignTableName);
+			var foreignTableWithoutQuotes = new SqlModifier().RemoveFirstAndLastCharacter(foreignTableName);
 
-			string l1 = AlterTable + " " + tableName + " ";
-			string l2 = "ADD FOREIGN KEY fk_" + foreignTableWithoutQuotes + "(" + fkName + ") ";
-			string l3 = "REFERENCES " + foreignTableName + "(" + foreignKeyName + ") ";
-			string l4 = "ON DELETE " + onDeleteOption + " ";
-			string l5 = "ON UPDATE " + onUpdateOption;
+			var l1 = AlterTable + " " + tableName + " ";
+			var l2 = "ADD FOREIGN KEY fk_" + foreignTableWithoutQuotes + "(" + fkName + ") ";
+			var l3 = "REFERENCES " + foreignTableName + "(" + foreignKeyName + ") ";
+			var l4 = "ON DELETE " + onDeleteOption + " ";
+			var l5 = "ON UPDATE " + onUpdateOption;
 
 			return l1 + l2 + l3 + l4 + l5;
 		}
@@ -112,12 +117,30 @@
 
 		public string CreateTestClassWithNotNullInt
 		{
-			get { return "CREATE TABLE `TestWithInteger` (`Id` int(11) PRIMARY KEY AUTO_INCREMENT, `Test` int(11) NOT NULL );"; }
+			get { return "CREATE TABLE `ToNullableTest` (`Id` int(11) PRIMARY KEY AUTO_INCREMENT, `Test` int(11) NOT NULL );"; }
 		}
 
-		public string DropTestClasses()
+		public string CreateTestClassFromIntToDouble
 		{
-			return "DROP TABLE `TestWithInteger`; DROP TABLE `TestClassWithFk`; DROP TABLE `TestClassWithoutFk`; DROP TABLE `BigTestClass`; DROP TABLE `SmallTestClass`";
+			get
+			{
+				return
+					"CREATE TABLE `FromIntToDoubleTest` (`Id` int(11) PRIMARY KEY AUTO_INCREMENT, `IntToDouble` int(11) NOT NULL );";
+			}
+		}
+
+		public string CreateTestClassWithNullDouble
+		{
+			get { return "CREATE TABLE `ToNonNullableTest` (`Id` int(11) PRIMARY KEY AUTO_INCREMENT, `NonNullable` DOUBLE NULL );"; }
+		}
+
+		public string DropTestClasses
+		{
+			get
+			{
+				return
+					"DROP TABLE `ToNonNullableTest`; DROP TABLE `FromIntToDoubleTest`; DROP TABLE `ToNullableTest`; DROP TABLE `TestClassWithFk`; DROP TABLE `TestClassWithoutFk`; DROP TABLE `BigTestClass`; DROP TABLE `SmallTestClass`";
+			}
 		}
 
 		public string CheckIfColumnExists(string tableName, string columnName)
@@ -131,84 +154,5 @@
 			       " AND COLUMN_NAME = " +
 			       columnName;
 		}
-
-		public string SpecialQuotes
-		{
-			get { return "'"; }
-		}
-
-		//public class MsSqlProvider : ISqlProvider
-		//{
-		//	public string TableInformation
-		//	{
-		//		get { return "EXEC SP_COLUMNS"; }
-		//	}
-
-		//	public string TableColumn
-		//	{
-		//		get { return "COLUMN_NAME"; }
-		//	}
-
-		//	public string DropColumn
-		//	{
-		//		get { return "DROP COLUMN"; }
-		//	}
-
-		//	public string DropTable
-		//	{
-		//		get { return "DROP TABLE"; }
-		//	}
-
-		//	public string AlterTable
-		//	{
-		//		get { return "ALTER TABLE"; }
-		//	}
-
-		//	public string AddForeignKeyConstraint(string tableName, string fkName, string foreignTableName, string foreignKeyName,
-		//		string onDeleteOption, string onUpdateOption)
-		//	{
-		//		throw new NotImplementedException();
-		//	}
-
-		//	public string DropForeignKey(string tableName, string fkConstraintName)
-		//	{
-		//		throw new NotImplementedException();
-		//	}
-
-		//	public string GetForeignKeyConstraintName(string tableName, string columnName)
-		//	{
-		//		throw new NotImplementedException();
-		//	}
-
-		//	public string CreateSmallTestClass()
-		//	{
-		//		throw new NotImplementedException();
-		//	}
-
-		//	public string CreateBigTestClass()
-		//	{
-		//		throw new NotImplementedException();
-		//	}
-
-		//	public string CreateTestClassWithFk()
-		//	{
-		//		throw new NotImplementedException();
-		//	}
-
-		//	public string DropTestClasses()
-		//	{
-		//		throw new NotImplementedException();
-		//	}
-
-		//	public string CheckIfColumnExists(string tableName, string columnName)
-		//	{
-		//		throw new NotImplementedException();
-		//	}
-
-		//	public string SpecialQuotes
-		//	{
-		//		get { return "'"; }
-		//	}
-		//}
 	}
 }

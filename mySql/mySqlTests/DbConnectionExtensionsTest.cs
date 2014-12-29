@@ -74,7 +74,7 @@ namespace mySqlTests
 			public int SmallTestClassId { get; set; }
 		}
 
-		//Model isn't generated in setup
+		//Model isn't generated in setup, there on update just creates it
 		class DoesntExist
 		{
 			[AutoIncrement]
@@ -82,11 +82,31 @@ namespace mySqlTests
 			public string Test { get; set; }
 		}
 
-		public class TestWithInteger
+		public class ToNullableTest
 		{
 			[AutoIncrement]
 			public int Id { get; set; }
 			public int? Test { get; set; }
+			//On db it's:
+			//public int Test { get; set; }
+		}
+
+		public class ToNonNullableTest
+		{
+			[AutoIncrement]
+			public int Id { get; set; }
+			public double NonNullable { get; set; }
+			//On db it's:
+			//public double? NonNullable { get; set; }
+		}
+
+		public class FromIntToDoubleTest
+		{
+			[AutoIncrement]
+			public int Id { get; set; }
+			public double IntToDouble { get; set; }
+			//On db it's:
+			//public int IntToDouble { get; set; }
 		}
 
 		[SetUp]
@@ -102,6 +122,8 @@ namespace mySqlTests
 				db.ExecuteSql(CustomProvider.CreateTestClassWithFk);
 				db.ExecuteSql(CustomProvider.CreateTestClassWithOutFk);
 				db.ExecuteSql(CustomProvider.CreateTestClassWithNotNullInt);
+				db.ExecuteSql(CustomProvider.CreateTestClassFromIntToDouble);
+				db.ExecuteSql(CustomProvider.CreateTestClassWithNullDouble);
 			}
 		}
 
@@ -111,7 +133,7 @@ namespace mySqlTests
 			var dbFactory = new OrmLiteConnectionFactory(connectionString_, OrmLiteDialectProvider);
 			using (var db = dbFactory.OpenDbConnection())
 			{
-				db.ExecuteSql(CustomProvider.DropTestClasses());
+				db.ExecuteSql(CustomProvider.DropTestClasses);
 			}
 		}
 
@@ -296,22 +318,76 @@ namespace mySqlTests
 			{
 				//Arrange
 				//Make sure test table is there
-				var tableName = CustomProvider.Quote("TestWithInteger");
+				var tableName = CustomProvider.Quote("ToNullableTest");
 				var columnName = CustomProvider.Quote("Test");
 
 				var noTestColumn = db.SqlList<string>(CustomProvider.CheckIfColumnExists(tableName, columnName)).Count;
 				Assert.AreEqual(1, noTestColumn);
 
 				//Make sure it's not nullable now
-				//Assert.That(() => db.Insert(new TestWithInteger { Test = null }), Throws.Exception);
+				Assert.That(() => db.Insert(new ToNullableTest { Test = null }), Throws.Exception);
 
 				//Act
-				db.UpdateTable<TestWithInteger>(CustomProvider, true);
+				db.UpdateTable<ToNullableTest>(CustomProvider, true);
 
 				//Assert
-				Assert.DoesNotThrow(() => db.Insert(new TestWithInteger { Test = null }));
+				Assert.DoesNotThrow(() => db.Insert(new ToNullableTest { Test = null }));
+			}
+		}
+
+		[Test]
+		public static void UpdateTable_ModelHasNonNullableDoubleButDbHasNullableDouble_UpdateDbToNonNullableDouble()
+		{
+			var dbFactory = new OrmLiteConnectionFactory(connectionString_, OrmLiteDialectProvider);
+			using (var db = dbFactory.OpenDbConnection())
+			{
+				//Arrange
+				//Make sure test table is there
+				var tableName = CustomProvider.Quote("ToNonNullableTest");
+				var columnName = CustomProvider.Quote("NonNullable");
+
+				var noTestColumn = db.SqlList<string>(CustomProvider.CheckIfColumnExists(tableName, columnName)).Count;
+				Assert.AreEqual(1, noTestColumn);
+
+				//Make sure it's nullable now
+				Assert.DoesNotThrow(() => db.ExecuteSql("INSERT INTO ToNonNullableTest (NonNullable) VALUES (null)"));
+
+				////Act
+				db.UpdateTable<ToNonNullableTest>(CustomProvider, true);
+
+				////Assert
+				Assert.That(() =>
+				{
+					db.ExecuteSql("INSERT INTO ToNonNullableTest (NonNullable) VALUES (null)");
+				}, Throws.Exception);
+			}
+		}
+
+		[Test]
+		public static void UpdateTable_ModelHasDoubleButDbHasInteger_DbGetsUpdatedToDouble()
+		{
+			var dbFactory = new OrmLiteConnectionFactory(connectionString_, OrmLiteDialectProvider);
+			using (var db = dbFactory.OpenDbConnection())
+			{
+				//Arrange
+				//Make sure test table is there
+				var tableName = CustomProvider.Quote("FromIntToDoubleTest");
+				var columnName = CustomProvider.Quote("IntToDouble");
+
+				var noTestColumn = db.SqlList<string>(CustomProvider.CheckIfColumnExists(tableName, columnName)).Count;
+				Assert.AreEqual(1, noTestColumn);
+
+				//Make sure it's an integer on DB now:
+				db.Insert(new FromIntToDoubleTest {IntToDouble = 5.6});
+				Assert.AreEqual(6, db.SqlScalar<double>("SELECT `IntToDouble` FROM `FromIntToDoubleTest` WHERE `Id` = 1"));
+
+				//Act
+				db.UpdateTable<FromIntToDoubleTest>(CustomProvider, true);
+
+				//Assert it now holds the true double value
+				db.Insert(new FromIntToDoubleTest {IntToDouble = 5.6});
+				Assert.AreEqual(5.6, db.SqlScalar<double>("SELECT `IntToDouble` FROM `FromIntToDoubleTest` WHERE `Id` = 2"), 0.1);
 			}
 		}
 	}
 }
-

@@ -25,17 +25,8 @@ namespace mySql
 
 			using (var db = dbFactory.OpenDbConnection())
 			{
-
-				db.DropTable<TestWithInteger>();
-				db.UpdateTable<TestWithInteger>(customProvider, true);
-				var sql = db.GetLastSql();
-
 				db.UpdateTable<Customer>(customProvider, true);
 				db.UpdateTable<Order>(customProvider, true);
-
-				//db.UpdateTable<SmallTestClass>(customProvider, true);
-				//db.UpdateTable<TestClassWithoutFk>(customProvider, true);
-
 
 				Console.ReadKey();
 			}

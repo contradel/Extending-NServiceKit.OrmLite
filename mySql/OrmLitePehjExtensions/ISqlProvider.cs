@@ -1,9 +1,8 @@
-﻿using System;
-using NServiceKit.DataAnnotations;
+﻿using NServiceKit.DataAnnotations;
 
 namespace OrmLitePehjExtensions
 {
-	public class TestWithInteger
+	public class ToNullableTest
 	{
 		[AutoIncrement]
 		public int Id { get; set; }
@@ -35,9 +34,9 @@ namespace OrmLitePehjExtensions
 		string CreateTestClassWithFk { get; }
 		string CreateTestClassWithOutFk { get; }
 		string CreateTestClassWithNotNullInt { get; }
-
-		string DropTestClasses();
-
+		string CreateTestClassFromIntToDouble { get; }
+		string CreateTestClassWithNullDouble { get; }
+		string DropTestClasses { get; }
 		string CheckIfColumnExists(string tableName, string columnName);
 	}
 }
