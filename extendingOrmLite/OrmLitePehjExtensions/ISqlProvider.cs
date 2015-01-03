@@ -11,10 +11,15 @@ namespace OrmLitePehjExtensions
 
 	public interface ISqlProvider
 	{
+		//Extracting information from database
 		string TableInformation { get; }
 		string ColumnName { get; }
 		string ColumnType { get; }
 		string Nullable { get; }
+		string Extra { get; }
+		string IsAutoIncrement { get; }
+		string PrimaryKey { get; }
+
 		string NotNullValue { get; }
 		string DropColumn { get; }
 		string DropTable { get; }
@@ -36,6 +41,7 @@ namespace OrmLitePehjExtensions
 		string CreateTestClassWithNotNullInt { get; }
 		string CreateTestClassFromIntToDouble { get; }
 		string CreateTestClassWithNullDouble { get; }
+		string CreateTestClassWithoutAutoIncrementId { get; }
 		string DropTestClasses { get; }
 		string CheckIfColumnExists(string tableName, string columnName);
 	}

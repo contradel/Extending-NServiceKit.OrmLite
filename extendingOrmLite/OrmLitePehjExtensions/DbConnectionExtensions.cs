@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using NServiceKit.OrmLite;
+using NServiceKit.Text;
 
 namespace OrmLitePehjExtensions
 {
@@ -13,6 +15,7 @@ namespace OrmLitePehjExtensions
 			public string Name { get; set; }
 			public string SqlType { get; set; }
 			public bool Nullable { get; set; }
+			public string Extra { get; set; }
 		}
 
 		//Modified code from http://stackoverflow.com/questions/14142433/with-ormlite-is-there-a-way-to-automatically-update-table-schema-when-my-poco-i
@@ -33,7 +36,8 @@ namespace OrmLitePehjExtensions
 						{
 							Name = reader[sqlProvider.ColumnName].ToString(),
 							SqlType = reader[sqlProvider.ColumnType].ToString(),
-							Nullable = reader[sqlProvider.Nullable].ToString() == sqlProvider.NotNullValue ? false : true
+							Nullable = reader[sqlProvider.Nullable].ToString() == sqlProvider.NotNullValue ? false : true,
+							Extra = reader[sqlProvider.Extra].ToString()
 						};
 
 						columns.Add(tempColumn);
@@ -65,7 +69,7 @@ namespace OrmLitePehjExtensions
 
 				foreach (FieldDefinition fieldDefinition in model.FieldDefinitions)
 				{
-					var found = dbColumns.Any(databaseColumnInfo => databaseColumnInfo.Name == fieldDefinition.FieldName);
+					var found = dbColumns.Any(x => x.Name == fieldDefinition.FieldName);
 					if (!found)
 						missingOnDb.Add(fieldDefinition);
 				}
@@ -163,11 +167,18 @@ namespace OrmLitePehjExtensions
 							continue;
 
 						//compare type and nullable
-						var dbType = SqlTypeConverter.GetTypeFromSqlString(databaseColumnInfo.SqlType);
-						if ((fieldDefinition.FieldType != dbType) || (databaseColumnInfo.Nullable != fieldDefinition.IsNullable))
+						Type dbType = SqlTypeConverter.GetTypeFromSqlString(databaseColumnInfo.SqlType);
+
+						//If there's a discrepancy between auto increment constraints, also just update, but do not specify "primary key" again
+						bool autoIncrementDiscrepancy = fieldDefinition.AutoIncrement && !databaseColumnInfo.Extra.Contains(sqlProvider.IsAutoIncrement);
+
+						if ((fieldDefinition.FieldType != dbType) || (databaseColumnInfo.Nullable != fieldDefinition.IsNullable) || autoIncrementDiscrepancy)
 						{
 							//Get alter column type sql to alter it to fieldDefinition.FieldType
 							var alterSql = db.GetDialectProvider().ToAlterColumnStatement(model.ModelType, fieldDefinition);
+
+							if (autoIncrementDiscrepancy)
+								alterSql = alterSql.Replace(sqlProvider.PrimaryKey, "");
 
 							//Execute sql
 							Console.WriteLine(alterSql);

@@ -32,4 +32,6 @@ namespace mySql
 		public DateTime? Birthday { get; set; }
 		public DateTime topdoge { get; set; }
 	}
+
+
 }

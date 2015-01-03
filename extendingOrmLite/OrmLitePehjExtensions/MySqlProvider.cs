@@ -27,6 +27,21 @@
 			get { return "NULL"; }
 		}
 
+		public string Extra
+		{
+			get { return "EXTRA"; }
+		}
+
+		public string IsAutoIncrement
+		{
+			get { return "auto_increment"; }
+		}
+
+		public string PrimaryKey
+		{
+			get { return "PRIMARY KEY"; }
+		}
+
 		public string NotNullValue
 		{
 			get { return "NO"; }
@@ -134,12 +149,20 @@
 			get { return "CREATE TABLE `ToNonNullableTest` (`Id` int(11) PRIMARY KEY AUTO_INCREMENT, `NonNullable` DOUBLE NULL );"; }
 		}
 
+		public string CreateTestClassWithoutAutoIncrementId
+		{
+			get
+			{
+				return "CREATE TABLE `IdWithoutAutoIncrement` (`Id` int(11) PRIMARY KEY, `AutoIncrementTest` VARCHAR(255) NULL);";
+			}
+		}
+
 		public string DropTestClasses
 		{
 			get
 			{
 				return
-					"DROP TABLE `ToNonNullableTest`; DROP TABLE `FromIntToDoubleTest`; DROP TABLE `ToNullableTest`; DROP TABLE `TestClassWithFk`; DROP TABLE `TestClassWithoutFk`; DROP TABLE `BigTestClass`; DROP TABLE `SmallTestClass`";
+					"DROP TABLE `IdWithoutAutoIncrement`; DROP TABLE `ToNonNullableTest`; DROP TABLE `FromIntToDoubleTest`; DROP TABLE `ToNullableTest`; DROP TABLE `TestClassWithFk`; DROP TABLE `TestClassWithoutFk`; DROP TABLE `BigTestClass`; DROP TABLE `SmallTestClass`";
 			}
 		}
 

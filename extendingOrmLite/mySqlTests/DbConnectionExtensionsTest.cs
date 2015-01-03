@@ -102,6 +102,14 @@ namespace mySqlTests
 			//public int IntToDouble { get; set; }
 		}
 
+		public class IdWithoutAutoIncrement
+		{
+			//On database, there's no autoIncrement constraint, should get added
+			[AutoIncrement]
+			public int Id { get; set; }
+			public string AutoIncrementTest { get; set; }
+		}
+
 		[SetUp]
 		public void Init()
 		{
@@ -117,6 +125,7 @@ namespace mySqlTests
 				db.ExecuteSql(CustomProvider.CreateTestClassWithNotNullInt);
 				db.ExecuteSql(CustomProvider.CreateTestClassFromIntToDouble);
 				db.ExecuteSql(CustomProvider.CreateTestClassWithNullDouble);
+				db.ExecuteSql(CustomProvider.CreateTestClassWithoutAutoIncrementId);
 			}
 		}
 
@@ -380,6 +389,47 @@ namespace mySqlTests
 				//Assert it now holds the true double value
 				db.Insert(new FromIntToDoubleTest {IntToDouble = 5.6});
 				Assert.AreEqual(5.6, db.SqlScalar<double>("SELECT `IntToDouble` FROM `FromIntToDoubleTest` WHERE `Id` = 2"), 0.1);
+			}
+		}
+
+		[Test]
+		public static void UpdateTable_ModelHasAutoIncrementIdButDatabaseDoesNot_DbGetsUpdatedToAutoIncrement()
+		{
+			var dbFactory = new OrmLiteConnectionFactory(connectionString_, OrmLiteDialectProvider);
+			using (var db = dbFactory.OpenDbConnection())
+			{
+				//Arrange
+				//Make sure it's there
+				//Make sure exception is thrown if two is inserted, double 0 primary key
+				var tableName = CustomProvider.Quote("IdWithoutAutoIncrement");
+				var columnName = CustomProvider.Quote("AutoIncrementTest");
+
+				var noTestColumn = db.SqlList<string>(CustomProvider.CheckIfColumnExists(tableName, columnName)).Count;
+				Assert.AreEqual(1, noTestColumn);
+
+				Assert.That(() =>
+				{
+					var c1 = new IdWithoutAutoIncrement {AutoIncrementTest = "testClass1"};
+					var c2 = new IdWithoutAutoIncrement {AutoIncrementTest = "testClass2"};
+
+					db.Insert(c1);
+					db.Insert(c2);
+
+				}, Throws.Exception);
+
+				//Act
+				db.UpdateTable<IdWithoutAutoIncrement>(CustomProvider, true);
+
+				//Assert
+				//Make sure exception is now not thrown upon inserting more than two
+				Assert.DoesNotThrow(() =>
+				{
+					var c1 = new IdWithoutAutoIncrement { AutoIncrementTest = "testClass3" };
+					var c2 = new IdWithoutAutoIncrement { AutoIncrementTest = "testClass4" };
+
+					db.Insert(c1);
+					db.Insert(c2);
+				});
 			}
 		}
 	}
