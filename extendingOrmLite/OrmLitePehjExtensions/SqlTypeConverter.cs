@@ -74,6 +74,10 @@ namespace OrmLitePehjExtensions
 			{
 				returnType = typeof(double);	//see http://msdn.microsoft.com/en-us/library/cc716729(v=vs.110).aspx
 			}
+			else if (sqlType.Contains("blob"))
+			{
+				returnType = typeof (string[]);
+			}
 
 			if (!sqlType.Contains("NULL"))
 			{
