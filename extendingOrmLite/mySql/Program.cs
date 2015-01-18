@@ -1,8 +1,8 @@
 ﻿using System;
-using NServiceKit.OrmLite;
-using NServiceKit.OrmLite.MySql;
 using OrmLitePehjExtensions;
 using OrmLitePehjExtensions.System.Data;
+using ServiceStack.OrmLite;
+using ServiceStack.OrmLite.MySql;
 
 namespace mySql
 {

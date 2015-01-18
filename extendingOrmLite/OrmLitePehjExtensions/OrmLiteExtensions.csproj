@@ -34,20 +34,23 @@
       <Private>True</Private>
       <HintPath>..\packages\MySql.Data.6.9.5\lib\net45\MySql.Data.dll</HintPath>
     </Reference>
-    <Reference Include="NServiceKit.Common">
-      <HintPath>..\packages\NServiceKit.Common.1.0.11\lib\net35\NServiceKit.Common.dll</HintPath>
+    <Reference Include="ServiceStack.Common">
+      <HintPath>..\packages\ServiceStack.Common.4.0.36\lib\net40\ServiceStack.Common.dll</HintPath>
     </Reference>
-    <Reference Include="NServiceKit.Interfaces">
-      <HintPath>..\packages\NServiceKit.Common.1.0.11\lib\net35\NServiceKit.Interfaces.dll</HintPath>
+    <Reference Include="ServiceStack.Interfaces">
+      <HintPath>..\packages\ServiceStack.Interfaces.4.0.36\lib\portable-wp80+sl5+net40+win8+monotouch+monoandroid\ServiceStack.Interfaces.dll</HintPath>
     </Reference>
-    <Reference Include="NServiceKit.OrmLite">
-      <HintPath>..\packages\NServiceKit.OrmLite.MySql.1.0.11\lib\net35\NServiceKit.OrmLite.dll</HintPath>
+    <Reference Include="ServiceStack.OrmLite">
+      <HintPath>..\packages\ServiceStack.OrmLite.4.0.36\lib\net45\ServiceStack.OrmLite.dll</HintPath>
     </Reference>
-    <Reference Include="NServiceKit.OrmLite.MySql">
-      <HintPath>..\packages\NServiceKit.OrmLite.MySql.1.0.11\lib\net35\NServiceKit.OrmLite.MySql.dll</HintPath>
+    <Reference Include="ServiceStack.OrmLite.MySql">
+      <HintPath>..\packages\ServiceStack.OrmLite.MySql.4.0.36\lib\net45\ServiceStack.OrmLite.MySql.dll</HintPath>
     </Reference>
-    <Reference Include="NServiceKit.Text">
-      <HintPath>..\packages\NServiceKit.Text.1.0.10\lib\net35\NServiceKit.Text.dll</HintPath>
+    <Reference Include="ServiceStack.OrmLite.SqlServer">
+      <HintPath>..\packages\ServiceStack.OrmLite.SqlServer.4.0.36\lib\net45\ServiceStack.OrmLite.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="ServiceStack.Text">
+      <HintPath>..\packages\ServiceStack.Text.4.0.36\lib\net40\ServiceStack.Text.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace OrmLitePehjExtensions
 {
@@ -6,11 +7,16 @@ namespace OrmLitePehjExtensions
 	{
 		public static string GetConnectionString(string path)
 		{
-			using (var sr = new StreamReader(path))
+			using (var file = new StreamReader(path))
 			{
-				var line = sr.ReadToEnd();
-				return line;
+				string line;
+				while ((line = file.ReadLine()) != null)
+				{
+					if (!line.Contains("#"))
+						return line;
+				}
 			}
+			throw new Exception("No suitable connection string in file");
 		}
 	}
 }

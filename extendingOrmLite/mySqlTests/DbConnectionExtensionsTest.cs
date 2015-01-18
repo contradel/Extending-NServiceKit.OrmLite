@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Linq;
-using NServiceKit.DataAnnotations;
-using NServiceKit.OrmLite;
-using NServiceKit.OrmLite.MySql;
 using NUnit.Framework;
 using OrmLitePehjExtensions;
 using OrmLitePehjExtensions.System.Data;
+using ServiceStack.DataAnnotations;
+using ServiceStack.OrmLite;
+using ServiceStack.OrmLite.MySql;
 
 namespace mySqlTests
 {

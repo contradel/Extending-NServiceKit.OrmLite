@@ -1,4 +1,4 @@
-﻿using NServiceKit.DataAnnotations;
+﻿using ServiceStack.DataAnnotations;
 
 namespace OrmLitePehjExtensions
 {

@@ -1,6 +1,5 @@
 ﻿using System;
-using NServiceKit.DataAnnotations;
-using NServiceKit.OrmLite;
+using ServiceStack.DataAnnotations;
 
 namespace mySql
 {
